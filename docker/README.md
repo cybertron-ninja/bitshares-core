@@ -3,6 +3,17 @@
 This repository comes with built-in Dockerfile to support docker
 containers. This README serves as documentation.
 
+## Required Software
+
+The following software must be installed on a host server before 
+bringing up the BitShares node.
+
+* [Docker][dockerfile_ref]
+* [Docker Compose][docker_compose_ref]
+
+In addition, the host server must be configured as a node in a 
+[Docker Swarm][docker_swarm].
+
 ## Dockerfile Specifications
 
 The `Dockerfile` performs the following steps:
@@ -89,7 +100,7 @@ With docker compose, multiple nodes can be managed with a single
 
 This container is properly registered with docker hub under the name:
 
-* [bitshares/bitshares-core](https://hub.docker.com/r/bitshares/bitshares-core/)
+* [bitshares/bitshares-core][bitshares_core_ref]
 
 Going forward, every release tag as well as all pushes to `develop` and
 `testnet` will be built into ready-to-run containers, there.
@@ -125,3 +136,50 @@ services:
 volumes:
  bitshares-fullnode:
 ```
+
+# Quickstart
+
+First, build the Docker container for either BitShares testnet or mainnet.  
+Execute one of the following commands depending on the BitShares chain you 
+want to run your node on.
+
+## Build for BitShares testnet
+
+```shell script
+docker-compose -f stack.testnet.yaml build
+```
+
+## Build for BitShares mainnet
+
+```shell script
+docker-compose -f stack.mainnet.yaml build
+```
+
+Next, deploy your shiney new BitShares node to either the testnet or mainnet.
+To deploy execute one of the following commands from the host server, which must
+be a node in a Docker Swarm cluster.  If you do not yet have a Docker Swarm, 
+you can initialize your host server as the leader of a new Docker Swarm by 
+executing `docker swarm init`.
+
+## Deploying onto BitShares testnet
+
+To deploy a BitShares full node on the **testnet**, execute the following:
+
+```shell script
+docker stack deploy -c stack.testnet.yaml bts-testnet
+```
+
+## Deploying onto BitShares mainnet
+
+To deploy a BitShares full node on the **mainnet**, execute the following:
+
+```shell script
+docker stack deploy -c stack.mainnet.yaml bts-mainnet
+```
+
+
+[bitshares_core_ref]: https://hub.docker.com/r/bitshares/bitshares-core/
+[dockerfile_ref]: https://docs.docker.com/engine/reference/builder/
+[docker_compose_ref]: https://docs.docker.com/compose/compose-file/
+[docker_swarm]: https://docs.docker.com/engine/reference/commandline/swarm_init/
+

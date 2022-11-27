@@ -1,0 +1,33 @@
+#!/bin/bash
+###############################################################################
+# convenience script to login to BTS node running in a Docker container
+SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+function output_usage () {
+	echo ""
+	echo "Usage: $(basename $0) mainnet|testnet [full|witness]"
+	echo ""
+}
+
+if [[ -z $1 ]]; then
+	output_usage
+	exit 1
+fi
+if [[ "$1" != "mainnet" && "$1" != "testnet" ]]; then
+	output_usage
+	exit 1
+fi
+ENVIRONMENT="$1"
+
+if [[ -z $2 ]]; then
+	NODE_TYPE=fullnode
+else
+	if [[ "$2" == "full" ]]; then
+		NODE_TYPE=fullnode
+	else
+		NODE_TYPE=witness
+	fi
+fi
+
+docker container exec -it $(docker container ls -f "name=bts-${ENVIRONMENT}_${NODE_TYPE}" -q) /bin/bash
+

@@ -1,0 +1,97 @@
+version: '3.8'
+
+networks:
+    front_end:
+    back_end:
+
+services:
+
+    fullnode:
+        image: cn/bitshares-core-full:6.1.2
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            args:
+                - BTS_USER=btsnode-testnet-full
+                - BTS_USER_ID=425
+                - BTS_GROUP_ID=425
+                - MAKE_JOBS=18
+        deploy:
+            replicas: 1
+            placement:
+#                max_replicas_per_node: 1
+                constraints: [node.labels.btsnode_testnet==true]
+        environment:
+            - BITSHARESD_PARTIAL_OPERATIONS=true
+            - BITSHARESD_P2P_ENDPOINT=0.0.0.0:1776
+            - BITSHARESD_RPC_ENDPOINT=0.0.0.0:8090
+            - BTS_CHAIN_NAME=testnet
+            - BTS_NODE_MODE=full
+        ports:
+            - "0.0.0.0:1776:1776"
+            - "0.0.0.0:8090:8090"
+        volumes:
+            - testnet_full:/var/lib/bitshares
+        networks:
+            front_end:
+                aliases:
+                    - btsfullnode
+        secrets:
+            - BTS_TESTNET_FULL_KEY
+
+    delayed_node:
+        image: cn/bitshares-core-witness:6.1.2
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            args:
+                - BTS_USER=btsnode-testnet-witness
+                - BTS_USER_ID=426
+                - BTS_GROUP_ID=426
+                - MAKE_JOBS=18
+        deploy:
+            replicas: 1
+            placement:
+#                max_replicas_per_node: 1
+                constraints: [node.labels.btsnode_testnet==true]
+        environment:
+            - BITSHARESD_PLUGINS=delayed_node witness
+            - BITSHARESD_TRUSTED_NODE=ws://btsfullnode:8091
+            - BITSHARESD_RPC_ENDPOINT=0.0.0.0:8091
+            - BTS_CHAIN_NAME=testnet
+            - BTS_NODE_MODE=witness
+        ports:
+            - "0.0.0.0:8091:8091"
+        volumes:
+            - testnet_witness:/var/lib/bitshares
+        networks:
+            front_end:
+                aliases:
+                    - btswitnessnode
+        secrets:
+            - BTS_TESTNET_WITNESS_KEY
+
+secrets:
+    BTS_TESTNET_FULL_KEY:
+        external: true
+    BTS_TESTNET_WITNESS_KEY:
+        external: true
+
+volumes:
+    testnet_full:
+    testnet_witness:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
